@@ -79,7 +79,7 @@
             div.append(removeButton);
           } else if(body.Fault.Code == "PUGREST.ServerBusy") {
             label.innerHTML = "Server overload... trying again in " + timeout/1000 + " second(s)...";
-            var newId = nextId;
+            var newId = replaceIndex >= 0 ? replaceIndex : nextId ;
             setTimeout(() => findCompoundImage(name, timeout * 2, newId), timeout);
           }
         }
