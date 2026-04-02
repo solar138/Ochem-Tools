@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Organic Chemical Image Finder</title>
+    <link href="global.css" rel="stylesheet"/>
+  </head>
+  <body>
+    <h1> Organic Chemical Image Finder </h1>
+    <p id="instructions"> Enter name(s) of compounds below. You can use new line or semicolon separated values to find multiple compounds at the same time. Powered by NIH PubChem Database.</p>
+    <div id="inputBox">
+      <textarea id="compoundName" placeholder="Enter name here"></textarea>
+      <input type="submit" id="submit"/>
+    </div>
+    <div id="results"></div>
+    <script>
+      compoundName.addEventListener("keyup", e => {
+        if (e.key == "Enter") {
+          submit.click();
+        }
+      });
+
+      submit.addEventListener("click", e => {
+        var names = compoundName.value.split(/;|\t|\n/);
+
+        console.log(names);
+        var promises = [];
+        for (var name of names) {
+          promises.push(findCompoundImage(name));
+        }
+
+        Promise.all(promises);
+        compoundName.value = "";
+      });
+
+      async function findCompoundImage(name, timeout=3000, replaceIndex=-1) {
+        if (name.length == 0) return;
+        if (replaceIndex != -1) {
+          document.getElementById(replaceIndex).innerHTML = "loading...";
+        }
+        var compoundName = name;
+        var image = document.createElement("img");
+        var label = document.createElement("span");
+        var div = document.createElement("div");
+        var body;
+
+        try {
+        var content = await fetch("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/" + encodeURIComponent(compoundName) + "/JSON", {
+          "body": null,
+          "method": "GET"
+        });
+        body = await content.json();
+        var id = body.PC_Compounds[0].id.id.cid;
+
+        var props = body.PC_Compounds[0].props;
+        var IUPACName = name;
+
+        for (var prop of props) {
+          if (prop.label == "IUPAC Name") { IUPACName += "<br/>" + prop.value.sval; console.log("IUPAC name found"); } 
+        }
+
+        label.innerHTML = IUPACName;
+        image.setAttribute("src", "https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=" + id + "&t=l");
+      } catch (error) {
+        if (body.Fault) {
+          label.innerHTML = body.Fault.Message;
+
+          if (body.Fault.Code == "PUGREST.NotFound")
+          {
+            label.innerHTML = "Compound " + name + " not found in PubChem Databse.";
+
+            var removeButton = document.createElement("button");
+
+            removeButton.innerHTML = "Remove";
+
+            removeButton.onclick = () => div.remove();
+
+            div.append(removeButton);
+          } else if(body.Fault.Code == "PUGREST.ServerBusy") {
+            label.innerHTML = "Server overload... trying again in " + timeout/1000 + " second(s)...";
+
+            setTimeout(() => findCompoundImage(name), timeout * 2, nextId);
+          }
+        }
+        label.className = "error";
+      }
+
+        div.className = "result";
+        div.append(image);
+        div.append(document.createElement("br"));
+        div.append(label);
+
+        if (replaceIndex != -1) {
+          div.id = replaceIndex;
+
+          results.insertBefore(div, document.getElementById(replaceIndex));
+
+          results.removeChild(document.getElementById(replaceIndex));
+        } else {
+          div.id = nextId;
+          nextId++;
+
+          results.append(div);
+        }
+
+        // var row = document.createElement("tr");
+        // var cell1 = document.createElement("td");
+        // cell1.append(label);
+
+        // var cell2 = document.createElement("td");
+        // cell2.append(image);
+
+        // row.append(cell1);
+        // row.append(cell2);
+
+        // results.append(row);
+      }
+      var nextId = 0;
+    </script>
+  </body>
+</html>

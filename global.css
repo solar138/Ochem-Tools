@@ -1,0 +1,46 @@
+body {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+}
+
+table {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+#results {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.result {
+    width: 300px;
+}
+
+#label {
+    display: inline-flex;
+    align-items: center;
+
+    margin-right: 5px;
+}
+
+#inputBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: auto;
+}
+
+textarea {
+    height: 54.4px;
+    width: 250px;
+}
+
+input {
+    height: 60px;
+    width: 100px;
+}
+
+.error {
+    max-width: 300px;
+}
