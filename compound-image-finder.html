@@ -32,9 +32,10 @@
         compoundName.value = "";
       });
 
-      async function findCompoundImage(name, timeout=3000, replaceIndex=-1) {
+      async function findCompoundImage(name, timeout=1000, replaceIndex=-1) {
         if (name.length == 0) return;
         if (replaceIndex != -1) {
+          console.log(replaceIndex);
           document.getElementById(replaceIndex).innerHTML = "loading...";
         }
         var compoundName = name;
@@ -77,8 +78,8 @@
             div.append(removeButton);
           } else if(body.Fault.Code == "PUGREST.ServerBusy") {
             label.innerHTML = "Server overload... trying again in " + timeout/1000 + " second(s)...";
-
-            setTimeout(() => findCompoundImage(name), timeout * 2, nextId);
+            var newId = nextId;
+            setTimeout(() => findCompoundImage(name, timeout * 2, newId), timeout);
           }
         }
         label.className = "error";
@@ -90,11 +91,12 @@
         div.append(label);
 
         if (replaceIndex != -1) {
+          var element = document.getElementById(replaceIndex);
           div.id = replaceIndex;
 
-          results.insertBefore(div, document.getElementById(replaceIndex));
+          results.insertBefore(div, element);
 
-          results.removeChild(document.getElementById(replaceIndex));
+          results.removeChild(element);
         } else {
           div.id = nextId;
           nextId++;
