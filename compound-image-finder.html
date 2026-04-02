@@ -33,6 +33,7 @@
       });
 
       async function findCompoundImage(name, timeout=1000, replaceIndex=-1) {
+        name = name.trim();
         if (name.length == 0) return;
         if (replaceIndex != -1) {
           console.log(replaceIndex);
